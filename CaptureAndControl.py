@@ -9,7 +9,7 @@ window_W = 1280
 window_L = 720
 def run_control():
     pygame.init()
-    camera = cv2.VideoCapture(2)
+    camera = cv2.VideoCapture(0)
     camera.set(3,window_W)
     camera.set(4,window_L)
     screen = pygame.display.set_mode((window_W,window_L))
