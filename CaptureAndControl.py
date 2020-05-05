@@ -8,37 +8,57 @@ import serial
 window_W = 1280
 window_L = 720
 def run_control():
+    """
+    主要函数，设置窗口参数，并包含大循环
+    """
     pygame.init()
+    # 将VideoCapture参数改为0能够在没有视频输入的时候使用笔记本摄像头，从而避免报错
+    # 正常使用过程中参数为2
     camera = cv2.VideoCapture(0)
     camera.set(3,window_W)
     camera.set(4,window_L)
+
+    # pygame参数设置
     screen = pygame.display.set_mode((window_W,window_L))
     pygame.display.set_caption("HDMICapture")
     pygame.event.set_grab(False)
 
+    # control_window = pygame.display.set_mode(200,120)
+    # pygame.display.set_caption("Control Window")
+
     while True:
         for event in pygame.event.get():
+            # pygame检测到退出
             if event.type == pygame.QUIT:
                 sys.exit(0)
 
+            # pygame检测到键盘按下
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     pygame.event.set_grab(not(pygame.event.get_grab()))
+                # 在终端展示按键对应的十六进制编码值，type: string
                 print('0x%x'%pygkey_to_code(event.key))
+
+                # 
                 print(ch9329_kbencode(pygkey_to_code(event.key),pygkey_mod(event.mod)))
 
+            # pygame检测到按键抬起
             elif event.type == pygame.KEYUP:
                 print("\x57\xAB\x00\x02\x08\x00\x00\x00\x00\x00\x00\x00\x00\x0C")
                 #ser.write("\x57\xAB\x00\x02\x08\x00\x00\x00\x00\x00\x00\x00\x00\x0C" )
 
+            # pygame检测鼠标位置
             elif event.type == pygame.MOUSEMOTION:
-                print(event.pos[0]) 
-                print(event.pos[1])
+                print('Mouse position:' + str(event.pos))
+
+                # print(event.pos[0])
+                # print(event.pos[1])
                 #ch9329_msencode(event.pos[0],event.pos[1])
                 print(ch9329_msencode(event.pos[0],event.pos[1]))
                 # if pygame.event.get_grab():
                 #     pygame.mouse.set_pos(window_W/2,window_W/2)
 
+            # pygame检测鼠标按键按下
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     print("You pressed the left mouse button")
@@ -55,6 +75,8 @@ def run_control():
                 elif event.button == 5:
                     print("You down")
                     print("\x57\xAB\x00\x05\x05\x01\x00\x00\x00\x81\x9C") 
+
+            # pygame检测鼠标按键抬起
             elif event.type == pygame.MOUSEBUTTONUP:
                 print("\x57\xAB\x00\x05\x05\x01\x00\x00\x00\x00\x0D")
                 if event.button == 1:
@@ -76,7 +98,9 @@ def run_control():
         pygame.display.flip()
 
 def ch9329_msencode(x,y):
-    # 
+    """
+    这是啥呀
+    """
     str_head = "\x57\xAB\x00\x04\x02\x00" 
 
     x = int(x*4096/1280)
@@ -95,6 +119,9 @@ def ch9329_msencode(x,y):
 
 
 def ch9329_kbencode(keyvalue,modvalue):
+    """
+    这又是什么
+    """
     str_head = "\x57\xAB\x00\x02\x08" 
     str_tail = chr((0x0C+keyvalue+modvalue)&0xff) 
     mod = chr(modvalue) 
@@ -104,6 +131,9 @@ def ch9329_kbencode(keyvalue,modvalue):
     return str_a
 
 def pygkey_mod(mod):
+    """
+        将特殊按键事件检测直接映射到编码
+    """
     modvalue = {
         pygame.KMOD_NONE     :0,
         pygame.KMOD_LSHIFT   :0x02,
@@ -127,6 +157,11 @@ def pygkey_mod(mod):
 
 
 def pygkey_to_code(key):
+    """
+    将除控制键之外的普通按键进行映射
+    """
+
+    # 将一般按键映射到对应的按键，用于获得按下了什么按键
     keyvalue = {
         pygame.K_BACKSPACE  :'back_space',   
         pygame.K_TAB        :'tab',         
@@ -262,6 +297,7 @@ def pygkey_to_code(key):
         pygame.K_POWER        :'',
         pygame.K_EURO             :'',
     }
+    # 将按键进行映射，得到对应的编码
     key_map = {
         '`' : 0x35,
         '1' : 0x1E,
