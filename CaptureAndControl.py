@@ -1,30 +1,42 @@
 import sys
-
 import cv2
 import numpy as np
 import pygame
 import serial
 
+import time
+from button import Button
+
 window_W = 1280
 window_L = 720
+# 设置控制栏高度
+control_L = 100
+
+
 def run_control():
     """
     主要函数，设置窗口参数，并包含大循环
     """
-    pygame.init()
     # 将VideoCapture参数改为0能够在没有视频输入的时候使用笔记本摄像头，从而避免报错
     # 正常使用过程中参数为2
     camera = cv2.VideoCapture(0)
     camera.set(3,window_W)
     camera.set(4,window_L)
-
+    
+    # 初始化pygame，所有和pygame相关的内容清放在该部分之后，以免因为未初始化而报错
+    pygame.init()
     # pygame参数设置
-    screen = pygame.display.set_mode((window_W,window_L))
+    screen = pygame.display.set_mode((window_W, window_L + control_L))
     pygame.display.set_caption("HDMICapture")
     pygame.event.set_grab(False)
 
-    # control_window = pygame.display.set_mode(200,120)
-    # pygame.display.set_caption("Control Window")
+    ### gui设置
+    # 设置按键
+    msg = ('Hello World')
+    play_button = Button(screen, msg)
+
+    ###
+
 
     while True:
         for event in pygame.event.get():
@@ -36,10 +48,8 @@ def run_control():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     pygame.event.set_grab(not(pygame.event.get_grab()))
-                # 在终端展示按键对应的十六进制编码值，type: string
+                # 在终端展示按键对应的十六进制编码值，：param type: string,
                 print('0x%x'%pygkey_to_code(event.key))
-
-                # 
                 print(ch9329_kbencode(pygkey_to_code(event.key),pygkey_mod(event.mod)))
 
             # pygame检测到按键抬起
@@ -50,9 +60,6 @@ def run_control():
             # pygame检测鼠标位置
             elif event.type == pygame.MOUSEMOTION:
                 print('Mouse position:' + str(event.pos))
-
-                # print(event.pos[0])
-                # print(event.pos[1])
                 #ch9329_msencode(event.pos[0],event.pos[1])
                 print(ch9329_msencode(event.pos[0],event.pos[1]))
                 # if pygame.event.get_grab():
@@ -89,13 +96,22 @@ def run_control():
                     print("You up")
                 elif event.button == 5:
                     print("You down")
-
+        
+        ### 交互界面相关操作
+        play_button.draw_button()
+            
+        ###
+        
         ret, frame = camera.read()
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame = frame.swapaxes(0,1)
         frame = pygame.surfarray.make_surface(frame)
         screen.blit(frame, (0,0))
         pygame.display.flip()
+        
+        # 时间暂停一段时间，限制刷新率
+        time.sleep(0.5)
+
 
 def ch9329_msencode(x,y):
     """
