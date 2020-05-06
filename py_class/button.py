@@ -1,7 +1,7 @@
 import pygame.font
 
 class Button():
-    def __init__(self, screen, msg, font_size):
+    def __init__(self, screen, msg, font_size, keyvalue, modvalue):
         """
         初始化按钮的属性
 
@@ -13,6 +13,8 @@ class Button():
         self.screen = screen
         self.screen_rect = screen.get_rect()
         self.font_size = font_size
+        self.keyvalue = keyvalue
+        self.modvalue = modvalue
         self.stats = False
 
         # 设置按钮的尺寸和其他属性

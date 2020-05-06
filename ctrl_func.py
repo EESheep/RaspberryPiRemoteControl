@@ -1,27 +1,34 @@
-def check_play_button(button, play_button, mouse_x, mouse_y):
-    if mouse_x < play_button.rect.right and mouse_x >= play_button.rect.left:
-        if mouse_y > play_button.rect.top and mouse_y <= play_button.rect.bottom:
+def check_button(button, mouse_x, mouse_y):
+    """
+    检测鼠标点击时，是否处在button的矩形框中
+    :param button: 定义的button
+    :param mouse_x: 鼠标位置横坐标
+    :param mouse_y: 鼠标位置纵坐标
+    """
+    if mouse_x < button.rect.right and mouse_x >= button.rect.left:
+        if mouse_y > button.rect.top and mouse_y <= button.rect.bottom:
             button.stats = True
 
 def ch9329_kbencode(keyvalue,modvalue):
     """
-    组合串口发送的键盘按键信息
+    拼接串口需要发送的键盘按键数据包，支持最多8个控制按键和1个普通按键
 
-    :param keyvalue: 按下的普通按键，目前该函数只能单个
-    :param modvalue: 按下的组合键，最多8个
-    :returns: 返回串口发送的信息
+    :param keyvalue: 按下的普通按键
+    :param modvalue: 按下的组合键
+    :returns: 返回串口需要发送的数据包
     """
-    str_head = "\x57\xAB\x00\x02\x08"
-    str_tail = chr((0x0C+keyvalue+modvalue)&0xff) 
-    mod = chr(modvalue) 
-    key = chr(keyvalue) 
-    str_a = str_head + mod + '\x00'  + key + '\x00\x00\x00\x00\x00'  + str_tail
+    str_head = "57AB000208"
+    str_tail = "%02x"%((0x0C+keyvalue+modvalue)&0xff) 
+    mod = "%02x"%(modvalue) 
+    key = "%02x"%(keyvalue) 
+    # str_a = str_head + '00' + '00'  + key + '0000000000'  + str_tail
+    str_a = str_head + mod + '00'  + key + '0000000000'  + str_tail
 
     return str_a
 
 def ch9329_msencode(x,y):
     """
-    组合串口发送的信息
+    组合串口发送的鼠标位置信息
 
     :param x: 鼠标位置的横坐标
     :param y: 鼠标位置的纵坐标

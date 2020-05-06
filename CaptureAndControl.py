@@ -38,7 +38,7 @@ def run_control():
 
     ### gui设置
     # 初始化按键
-    play_button = Button(screen, 'Hello World', 32)
+    manager_button = Button(screen, 'Hello World', 32, keyvalue = 0x05, modvalue = 0x4c)
     ###
 
 
@@ -75,13 +75,13 @@ def run_control():
 
             # pygame检测鼠标按键按下
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                # 检查鼠标按下的位置是否在play_button之中
-                ctrl_func.check_play_button(play_button, play_button, mouse_x, mouse_y)
-                
-                if play_button.stats:
-                    print("Hello World")
+                # 检查鼠标按下的位置是否在manager_button之中
+                ctrl_func.check_button(manager_button, mouse_x, mouse_y)
+                if manager_button.stats:
+                    comb_kb_data = ctrl_func.ch9329_kbencode(manager_button.keyvalue, manager_button.modvalue)
+                    print(comb_kb_data)
                     # 需要将stats改为False以便下一次检测
-                    play_button.stats = False
+                    manager_button.stats = False
 
                 if event.button == 1:
                     print("You pressed the left mouse button")
@@ -114,11 +114,11 @@ def run_control():
                     print("You down")
         
         ### 交互界面相关操作
-        play_button.draw_button()
-        # ctrl_func.check_play_button(play_button.stats, play_button, mouse_x, mouse_y)
-        # if play_button.stats:
+        manager_button.draw_button()
+        # ctrl_func.check_button(manager_button.stats, manager_button, mouse_x, mouse_y)
+        # if manager_button.stats:
         #     print("Hello World")
-        #     play_button.stats = False
+        #     manager_button.stats = False
         ###
         
         ret, frame = camera.read()
