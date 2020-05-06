@@ -8,6 +8,7 @@ class Button():
         :param screen: 要在哪个窗口显示
         :param msg: 按钮中显示的消息
         :param font_size: 显示消息的字体大小
+        :param value: 该按钮对应的发送到串口的数据
         """
         self.screen = screen
         self.screen_rect = screen.get_rect()

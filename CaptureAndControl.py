@@ -6,6 +6,7 @@ import cv2
 import numpy as np
 import pygame
 import serial
+import copy
 
 import time
 from py_class.button import Button
@@ -52,10 +53,11 @@ def run_control():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     pygame.event.set_grab(not(pygame.event.get_grab()))
+
                 # 在终端输出按键对应的十六进制编码值
                 print('0x%x'%pygkey_to_code(event.key))
                 # 在终端输出串口发送的信息
-                print(ch9329_kbencode(pygkey_to_code(event.key),pygkey_mod(event.mod)))
+                print(ch9329_kbencode(pygkey_to_code(event.key), pygkey_mod(event.mod)))
 
             # pygame检测到按键抬起
             elif event.type == pygame.KEYUP:
@@ -73,10 +75,14 @@ def run_control():
 
             # pygame检测鼠标按键按下
             elif event.type == pygame.MOUSEBUTTONDOWN:
+                # 检查鼠标按下的位置是否在play_button之中
                 ctrl_func.check_play_button(play_button, play_button, mouse_x, mouse_y)
+                
                 if play_button.stats:
                     print("Hello World")
+                    # 需要将stats改为False以便下一次检测
                     play_button.stats = False
+
                 if event.button == 1:
                     print("You pressed the left mouse button")
                     # print("\x57\xAB\x00\x05\x05\x01\x01\x00\x00\x00\x0E")
@@ -93,7 +99,7 @@ def run_control():
                     print("You down")
                     # print("\x57\xAB\x00\x05\x05\x01\x00\x00\x00\x81\x9C") 
 
-            # pygame检测鼠标按键动作
+            # pygame检测鼠标按键抬起
             elif event.type == pygame.MOUSEBUTTONUP:
                 # print("\x57\xAB\x00\x05\x05\x01\x00\x00\x00\x00\x0D")
                 if event.button == 1:
@@ -116,6 +122,10 @@ def run_control():
         ###
         
         ret, frame = camera.read()
+        del ret
+        # ret有实际的用途吗？必须存在两个参数吗？
+        # 如果必须存在两个参数但是又没有使用到的话，通过del删除该变量
+
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame = frame.swapaxes(0,1)
         frame = pygame.surfarray.make_surface(frame)
@@ -154,8 +164,8 @@ def ch9329_kbencode(keyvalue,modvalue):
     """
     组合串口发送的键盘按键信息
 
-    :param keyvalue: 按下了哪个按键
-    :param modvalue: 传输按下按键所需要的串口信息
+    :param keyvalue: 按下的普通按键
+    :param modvalue: 按下的组合键
     :returns: 返回串口发送的信息
     """
     str_head = "\x57\xAB\x00\x02\x08" 
@@ -168,7 +178,7 @@ def ch9329_kbencode(keyvalue,modvalue):
 
 def pygkey_mod(mod):
     """
-        将特殊按键事件检测直接映射到编码
+    将特殊按键事件检测直接映射到编码
     """
     modvalue = {
         pygame.KMOD_NONE     :0,
@@ -200,10 +210,10 @@ def pygkey_to_code(key):
     # 将一般按键映射到对应的按键，用于获得按下了什么按键
     keyvalue = {
         pygame.K_BACKSPACE  :'back_space',   
-        pygame.K_TAB        :'tab',         
-        pygame.K_CLEAR      :'',       
-        pygame.K_RETURN     :'', 
-        pygame.K_PAUSE      :'pause', 
+        pygame.K_TAB        :'tab',
+        pygame.K_CLEAR      :'',
+        pygame.K_RETURN     :'',
+        pygame.K_PAUSE      :'pause',
         pygame.K_ESCAPE     :'esc',
         pygame.K_SPACE       :'space',       
         pygame.K_EXCLAIM     :'',
