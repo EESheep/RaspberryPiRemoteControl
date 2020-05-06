@@ -164,11 +164,11 @@ def ch9329_kbencode(keyvalue,modvalue):
     """
     组合串口发送的键盘按键信息
 
-    :param keyvalue: 按下的普通按键
-    :param modvalue: 按下的组合键
+    :param keyvalue: 按下的普通按键，目前该函数只能单个
+    :param modvalue: 按下的组合键，最多8个
     :returns: 返回串口发送的信息
     """
-    str_head = "\x57\xAB\x00\x02\x08" 
+    str_head = "\x57\xAB\x00\x02\x08"
     str_tail = chr((0x0C+keyvalue+modvalue)&0xff) 
     mod = chr(modvalue) 
     key = chr(keyvalue) 
@@ -178,7 +178,7 @@ def ch9329_kbencode(keyvalue,modvalue):
 
 def pygkey_mod(mod):
     """
-    将特殊按键事件检测直接映射到编码
+    组合键
     """
     modvalue = {
         pygame.KMOD_NONE     :0,
