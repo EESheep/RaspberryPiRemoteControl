@@ -1,3 +1,6 @@
+# pylint: disable=no-member
+# 上述注释能够忽略在vscode中出现 "Module * has no * member"的报错
+# 但是该报错实际上并不会对运行造成影响
 import sys
 import cv2
 import numpy as np
@@ -6,6 +9,7 @@ import serial
 
 import time
 from button import Button
+import ctrl_func
 
 window_W = 1280
 window_L = 720
@@ -48,8 +52,9 @@ def run_control():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     pygame.event.set_grab(not(pygame.event.get_grab()))
-                # 在终端展示按键对应的十六进制编码值，：param type: string,
+                # 在终端输出按键对应的十六进制编码值
                 print('0x%x'%pygkey_to_code(event.key))
+                # 在终端输出串口发送的信息
                 print(ch9329_kbencode(pygkey_to_code(event.key),pygkey_mod(event.mod)))
 
             # pygame检测到按键抬起
@@ -115,7 +120,10 @@ def run_control():
 
 def ch9329_msencode(x,y):
     """
-    这是啥呀
+    组合串口发送的信息
+
+    :param x: 鼠标位置的横坐标
+    :param y: 鼠标位置的纵坐标
     """
     str_head = "\x57\xAB\x00\x04\x02\x00" 
 
@@ -136,7 +144,11 @@ def ch9329_msencode(x,y):
 
 def ch9329_kbencode(keyvalue,modvalue):
     """
-    这又是什么
+    组合串口发送的键盘按键信息
+
+    :param keyvalue: 按下了哪个按键
+    :param modvalue: 传输按下按键所需要的串口信息
+    :returns: 返回串口发送的信息
     """
     str_head = "\x57\xAB\x00\x02\x08" 
     str_tail = chr((0x0C+keyvalue+modvalue)&0xff) 
