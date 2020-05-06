@@ -8,11 +8,12 @@ import pygame
 import serial
 
 import time
-from button import Button
+from py_class.button import Button
 import ctrl_func
 
 window_W = 1280
-window_L = 720
+# 临时更改了窗口高度，适应电脑分辨率
+window_L = 620
 # 设置控制栏高度
 control_L = 100
 
@@ -35,15 +36,14 @@ def run_control():
     pygame.event.set_grab(False)
 
     ### gui设置
-    # 设置按键
-    msg = ('Hello World')
-    play_button = Button(screen, msg)
-
+    # 初始化按键
+    play_button = Button(screen, 'Hello World', 32)
     ###
 
 
     while True:
         for event in pygame.event.get():
+            
             # pygame检测到退出
             if event.type == pygame.QUIT:
                 sys.exit(0)
@@ -64,33 +64,38 @@ def run_control():
 
             # pygame检测鼠标位置
             elif event.type == pygame.MOUSEMOTION:
-                print('Mouse position:' + str(event.pos))
-                #ch9329_msencode(event.pos[0],event.pos[1])
-                print(ch9329_msencode(event.pos[0],event.pos[1]))
+                mouse_x ,mouse_y = pygame.mouse.get_pos()
+                print('Mouse position: (' + str(mouse_x) + ', ' + str(mouse_y) + ')')
+                # ch9329_msencode(mouse_x, mouse_y)
+                # print(ch9329_msencode(mouse_x, mouse_y)
                 # if pygame.event.get_grab():
                 #     pygame.mouse.set_pos(window_W/2,window_W/2)
 
             # pygame检测鼠标按键按下
             elif event.type == pygame.MOUSEBUTTONDOWN:
+                ctrl_func.check_play_button(play_button, play_button, mouse_x, mouse_y)
+                if play_button.stats:
+                    print("Hello World")
+                    play_button.stats = False
                 if event.button == 1:
                     print("You pressed the left mouse button")
-                    print("\x57\xAB\x00\x05\x05\x01\x01\x00\x00\x00\x0E")
+                    # print("\x57\xAB\x00\x05\x05\x01\x01\x00\x00\x00\x0E")
                 elif event.button == 2:
                     print("You pressed the middle mouse button")
-                    print("\x57\xAB\x00\x05\x05\x01\x04\x00\x00\x00\x11")
+                    # print("\x57\xAB\x00\x05\x05\x01\x04\x00\x00\x00\x11")
                 elif event.button == 3:
                     print("You pressed the right mouse button")
-                    print("\x57\xAB\x00\x05\x05\x01\x02\x00\x00\x00\x0F")
+                    # print("\x57\xAB\x00\x05\x05\x01\x02\x00\x00\x00\x0F")
                 elif event.button == 4:
                     print("You up")
-                    print("\x57\xAB\x00\x05\x05\x01\x00\x00\x00\x01\x0E") 
+                    # print("\x57\xAB\x00\x05\x05\x01\x00\x00\x00\x01\x0E") 
                 elif event.button == 5:
                     print("You down")
-                    print("\x57\xAB\x00\x05\x05\x01\x00\x00\x00\x81\x9C") 
+                    # print("\x57\xAB\x00\x05\x05\x01\x00\x00\x00\x81\x9C") 
 
-            # pygame检测鼠标按键抬起
+            # pygame检测鼠标按键动作
             elif event.type == pygame.MOUSEBUTTONUP:
-                print("\x57\xAB\x00\x05\x05\x01\x00\x00\x00\x00\x0D")
+                # print("\x57\xAB\x00\x05\x05\x01\x00\x00\x00\x00\x0D")
                 if event.button == 1:
                     print("You released the left mouse button")
                 elif event.button == 2:
@@ -104,7 +109,10 @@ def run_control():
         
         ### 交互界面相关操作
         play_button.draw_button()
-            
+        # ctrl_func.check_play_button(play_button.stats, play_button, mouse_x, mouse_y)
+        # if play_button.stats:
+        #     print("Hello World")
+        #     play_button.stats = False
         ###
         
         ret, frame = camera.read()
@@ -115,7 +123,7 @@ def run_control():
         pygame.display.flip()
         
         # 时间暂停一段时间，限制刷新率
-        time.sleep(0.5)
+        time.sleep(0.3)
 
 
 def ch9329_msencode(x,y):
