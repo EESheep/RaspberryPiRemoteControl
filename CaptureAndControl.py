@@ -57,7 +57,7 @@ def run_control():
                 # 在终端输出按键对应的十六进制编码值
                 print('0x%x'%pygkey_to_code(event.key))
                 # 在终端输出串口发送的信息
-                print(ch9329_kbencode(pygkey_to_code(event.key), pygkey_mod(event.mod)))
+                print(ctrl_func.ch9329_kbencode(pygkey_to_code(event.key), pygkey_mod(event.mod)))
 
             # pygame检测到按键抬起
             elif event.type == pygame.KEYUP:
@@ -68,8 +68,8 @@ def run_control():
             elif event.type == pygame.MOUSEMOTION:
                 mouse_x ,mouse_y = pygame.mouse.get_pos()
                 print('Mouse position: (' + str(mouse_x) + ', ' + str(mouse_y) + ')')
-                # ch9329_msencode(mouse_x, mouse_y)
-                # print(ch9329_msencode(mouse_x, mouse_y)
+                # ctrl_func.ch9329_msencode(mouse_x, mouse_y)
+                # print(ctrl_func.ch9329_msencode(mouse_x, mouse_y))
                 # if pygame.event.get_grab():
                 #     pygame.mouse.set_pos(window_W/2,window_W/2)
 
@@ -136,46 +136,6 @@ def run_control():
         time.sleep(0.3)
 
 
-def ch9329_msencode(x,y):
-    """
-    组合串口发送的信息
-
-    :param x: 鼠标位置的横坐标
-    :param y: 鼠标位置的纵坐标
-    """
-    str_head = "\x57\xAB\x00\x04\x02\x00" 
-
-    x = int(x*4096/1280)
-    y = int(y*4096/768)
-
-    x_str1 = chr(x&0xff) 
-    x_str2 = chr((x>>8)&0xff)
-    y_str1 = chr(y&0xff) 
-    y_str2 = chr((y>>8)&0xff) 
-
-    str_tail = 0x57+0xAB+4+7+2+ int(y&0xff) +  int((y>>8)&0xff) + int(x&0xff) +  int((x>>8)&0xff)
-
-    str = str_head + x_str1 +x_str2 + y_str1 + y_str2 + '\x00' + chr(str_tail&0xff)
-
-    return str
-
-
-def ch9329_kbencode(keyvalue,modvalue):
-    """
-    组合串口发送的键盘按键信息
-
-    :param keyvalue: 按下的普通按键，目前该函数只能单个
-    :param modvalue: 按下的组合键，最多8个
-    :returns: 返回串口发送的信息
-    """
-    str_head = "\x57\xAB\x00\x02\x08"
-    str_tail = chr((0x0C+keyvalue+modvalue)&0xff) 
-    mod = chr(modvalue) 
-    key = chr(keyvalue) 
-    str_a = str_head + mod + '\x00'  + key + '\x00\x00\x00\x00\x00'  + str_tail
-
-    return str_a
-
 def pygkey_mod(mod):
     """
     组合键
@@ -200,7 +160,6 @@ def pygkey_mod(mod):
     }
 
     return modvalue.get(mod,0)
-
 
 def pygkey_to_code(key):
     """
