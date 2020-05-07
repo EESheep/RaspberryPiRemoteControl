@@ -1,6 +1,8 @@
 # pylint: disable=no-member
+# -*- coding: utf-8 -*
 # 上述注释能够忽略在vscode中出现 "Module * has no * member"的报错
 # 但是该报错实际上并不会对运行造成影响
+
 import sys
 import cv2
 import numpy as np
@@ -12,25 +14,33 @@ import time
 from py_class.button import Button
 import ctrl_func
 
-window_W = 1280
-# 临时更改了窗口高度，适应电脑分辨率
-window_L = 620
+window_size = {}
+window_size['window_W'] = 1280
+# 临时更改了窗口高度，适应电脑分辨率，原值为720
+window_size['window_L'] = 620
 # 设置控制栏高度
-control_L = 100
+window_size['control_L'] = 100
 
+window_W = window_size['window_W']
+window_L = window_size['window_L']
+control_L = window_size['control_L']
 
-def run_control():
+def main():
     """
     主要函数，设置窗口参数，并包含大循环
     """
+
+
+    # 初始化pygame，所有和pygame相关的内容清放在该部分之后，以免因为未初始化而报错
+    pygame.init()
+
     # 将VideoCapture参数改为0能够在没有视频输入的时候使用笔记本摄像头，从而避免报错
     # 正常使用过程中参数为2
     camera = cv2.VideoCapture(0)
-    camera.set(3,window_W)
-    camera.set(4,window_L)
+    camera.set(3, window_W)
+    camera.set(4, window_L)
     
-    # 初始化pygame，所有和pygame相关的内容清放在该部分之后，以免因为未初始化而报错
-    pygame.init()
+    
     # pygame参数设置
     screen = pygame.display.set_mode((window_W, window_L + control_L))
     pygame.display.set_caption("HDMICapture")
@@ -54,22 +64,26 @@ def run_control():
                 if event.key == pygame.K_ESCAPE:
                     pygame.event.set_grab(not(pygame.event.get_grab()))
 
-                # 在终端输出按键对应的十六进制编码值
-                print('0x%x'%pygkey_to_code(event.key))
-                # 在终端输出串口发送的信息
-                print(ctrl_func.ch9329_kbencode(pygkey_to_code(event.key), pygkey_mod(event.mod)))
+                # 在终端打印串口发送的信息
+                if event.key != pygame.K_LSHIFT:
+                    print(bytes.fromhex(ctrl_func.ch9329_kbencode(pygkey_to_code(event.key),0)))
+                    # ser.write(bytes.fromhex(ch9329_kbencode(pygkey_to_code(event.key),0)))
 
             # pygame检测到按键抬起
             elif event.type == pygame.KEYUP:
-                print("\x57\xAB\x00\x02\x08\x00\x00\x00\x00\x00\x00\x00\x00\x0C")
-                #ser.write("\x57\xAB\x00\x02\x08\x00\x00\x00\x00\x00\x00\x00\x00\x0C" )
+                pass
+                # ser.write(bytes.fromhex("57AB00020800000000000000000C"))
+                # ser.write("57AB00020800000000000000000C" )
 
             # pygame检测鼠标位置
             elif event.type == pygame.MOUSEMOTION:
-                mouse_x ,mouse_y = pygame.mouse.get_pos()
-                print('Mouse position: (' + str(mouse_x) + ', ' + str(mouse_y) + ')')
-                # ctrl_func.ch9329_msencode(mouse_x, mouse_y)
-                # print(ctrl_func.ch9329_msencode(mouse_x, mouse_y))
+                mouse_x = event.pos[0]
+                mouse_y = event.pos[1]
+                print('Mouse position: (' + event.pos[0] + ', ' + event.pos[1] + ')')
+
+                pos_str = ctrl_func.ch9329_msencode(event.pos[0], event.pos[1], window_size)
+                # ser.write(bytes.fromhex(pos_str))
+                print(pos_str)
                 # if pygame.event.get_grab():
                 #     pygame.mouse.set_pos(window_W/2,window_W/2)
 
@@ -85,23 +99,22 @@ def run_control():
 
                 if event.button == 1:
                     print("You pressed the left mouse button")
-                    # print("\x57\xAB\x00\x05\x05\x01\x01\x00\x00\x00\x0E")
+                    # ser.write(bytes.fromhex("57ab00050501010000000E"))
                 elif event.button == 2:
                     print("You pressed the middle mouse button")
-                    # print("\x57\xAB\x00\x05\x05\x01\x04\x00\x00\x00\x11")
+                    # ser.write(bytes.fromhex("57ab000505010400000011"))
                 elif event.button == 3:
                     print("You pressed the right mouse button")
-                    # print("\x57\xAB\x00\x05\x05\x01\x02\x00\x00\x00\x0F")
+                    # ser.write(bytes.fromhex("57ab00050501020000000f"))
                 elif event.button == 4:
                     print("You up")
-                    # print("\x57\xAB\x00\x05\x05\x01\x00\x00\x00\x01\x0E") 
+                    # ser.write(bytes.fromhex("57ab00050501000000010E"))
                 elif event.button == 5:
                     print("You down")
-                    # print("\x57\xAB\x00\x05\x05\x01\x00\x00\x00\x81\x9C") 
-
-            # pygame检测鼠标按键抬起
+                    # ser.write(bytes.fromhex("57ab00050501000000ff0c"))
             elif event.type == pygame.MOUSEBUTTONUP:
-                # print("\x57\xAB\x00\x05\x05\x01\x00\x00\x00\x00\x0D")
+                # print("57ab00050501000000000D")
+                # ser.write(bytes.fromhex("57ab00050501000000000D"))
                 if event.button == 1:
                     print("You released the left mouse button")
                 elif event.button == 2:
@@ -135,6 +148,14 @@ def run_control():
         # 时间暂停一段时间，限制刷新率
         time.sleep(0.3)
 
+        # count = ser.inWaiting()
+        # if count != 0:
+        #     recv = ser.read(count)
+        #     print(recv)
+        # ser.flushInput()
+
+        # ser.write(bytes.fromhex("57ab00050501020000000F"))
+        # ser.write(bytes.fromhex("57ab00050501000000000D"))
 
 def pygkey_mod(mod):
     """
@@ -258,8 +279,8 @@ def pygkey_to_code(key):
         pygame.K_KP_EQUALS  :'=',
         pygame.K_UP             :'up_arrow',    
         pygame.K_DOWN             :'down_arrow',
-        pygame.K_RIGHT            :'left_arrow',
-        pygame.K_LEFT              :'right_arrow',
+        pygame.K_RIGHT            :'right_arrow',
+        pygame.K_LEFT              :'left_arrow',
         pygame.K_INSERT              :'insert',
         pygame.K_HOME                :'home',
         pygame.K_END               :'end',
@@ -417,4 +438,13 @@ def pygkey_to_code(key):
 
     return key_map.get(keyvalue.get(key,0),0)
 
-run_control()
+if __name__ == '__main__':
+    try:
+        ser = serial.Serial('/dev/ttyAMA0', 9600)
+        if ser.isOpen == False:
+            ser.open()
+        #ser.write(bytes.fromhex("57ab00050501020000000F"))
+        main()
+    except KeyboardInterrupt:
+        if ser != None:
+            ser.close()
