@@ -46,18 +46,3 @@ def ch9329_msencode(mouse_x, mouse_y, window_size):
 
     str = str_head + x_str1 +x_str2 + y_str1 + y_str2 + '00' + "%02x"%(str_tail&0xff)
     return str
-    # str_head = "\x57\xAB\x00\x04\x02\x00" 
-
-    # x = int(x*4096/1280)
-    # y = int(y*4096/768)
-
-    # x_str1 = chr(x&0xff) 
-    # x_str2 = chr((x>>8)&0xff)
-    # y_str1 = chr(y&0xff) 
-    # y_str2 = chr((y>>8)&0xff) 
-
-    # str_tail = 0x57+0xAB+4+7+2+ int(y&0xff) +  int((y>>8)&0xff) + int(x&0xff) +  int((x>>8)&0xff)
-
-    # str = str_head + x_str1 +x_str2 + y_str1 + y_str2 + '\x00' + chr(str_tail&0xff)
-
-    # return str
