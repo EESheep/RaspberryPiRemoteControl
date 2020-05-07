@@ -79,7 +79,7 @@ def main():
             elif event.type == pygame.MOUSEMOTION:
                 mouse_x = event.pos[0]
                 mouse_y = event.pos[1]
-                print('Mouse position: (' + event.pos[0] + ', ' + event.pos[1] + ')')
+                print('Mouse position: (' + str(event.pos[0]) + ', ' + str(event.pos[1]) + ')')
 
                 pos_str = ctrl_func.ch9329_msencode(event.pos[0], event.pos[1], window_size)
                 # ser.write(bytes.fromhex(pos_str))
@@ -440,11 +440,12 @@ def pygkey_to_code(key):
 
 if __name__ == '__main__':
     try:
-        ser = serial.Serial('/dev/ttyAMA0', 9600)
-        if ser.isOpen == False:
-            ser.open()
+        # ser = serial.Serial('/dev/ttyAMA0', 9600)
+        # if ser.isOpen == False:
+        #     ser.open()
         #ser.write(bytes.fromhex("57ab00050501020000000F"))
         main()
     except KeyboardInterrupt:
-        if ser != None:
-            ser.close()
+        print(KeyboardInterrupt)
+        # if ser != None:
+        #     ser.close()
